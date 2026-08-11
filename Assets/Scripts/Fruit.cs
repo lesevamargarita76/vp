@@ -11,6 +11,7 @@ public class Fruit : MonoBehaviour
     private Rigidbody body;
     private Collider trigger;
     private ParticleSystem juice;
+    private bool isSliced;
 
     private void Awake()
     {
@@ -19,15 +20,31 @@ public class Fruit : MonoBehaviour
         juice = GetComponentInChildren<ParticleSystem>();
     }
 
+    public void Cut(Blade blade)
+    {
+        Slice(blade.Direction, blade.transform.position, blade.SliceForce);
+    }
+
     private void Slice(Vector3 direction, Vector3 hitPoint, float force)
     {
+        if (isSliced)
+        {
+            return;
+        }
+
+        isSliced = true;
+
         GameManager.Instance.IncreaseScore(points);
 
         trigger.enabled = false;
         whole.SetActive(false);
 
         sliced.SetActive(true);
-        juice.Play();
+
+        if (juice != null)
+        {
+            juice.Play();
+        }
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         sliced.transform.rotation = Quaternion.Euler(0f, 0f, angle);
@@ -46,7 +63,11 @@ public class Fruit : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Blade blade = other.GetComponent<Blade>();
-            Slice(blade.Direction, blade.transform.position, blade.SliceForce);
+
+            if (blade != null)
+            {
+                Cut(blade);
+            }
         }
     }
 
