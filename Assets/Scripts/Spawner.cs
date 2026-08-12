@@ -4,8 +4,8 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     [Header("Spawner Settings")]
-    [SerializeField] private GameObject[] fruits;
-    [SerializeField] private GameObject bomb;
+    [SerializeField] private GameObject[] fruitPrefabs;
+    [SerializeField] private GameObject bombPrefab;
 
     [Range(0f, 1f)]
     [SerializeField] private float bombChance = 0.05f;
@@ -19,7 +19,10 @@ public class Spawner : MonoBehaviour
     [SerializeField] private float minForce = 18f;
     [SerializeField] private float maxForce = 22f;
 
-    [SerializeField] private float lifeTime = 5f;
+    [SerializeField] private float maxLifetime = 5f;
+
+    [Tooltip("Задержка перед первым броском после включения спавнера")]
+    [SerializeField] private float initialDelay = 2f;
 
     private Collider area;
 
@@ -40,21 +43,27 @@ public class Spawner : MonoBehaviour
 
     private IEnumerator Spawn()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(initialDelay);
 
         while (enabled)
         {
-            if (fruits == null || fruits.Length == 0)
+            if (fruitPrefabs == null || fruitPrefabs.Length == 0)
             {
                 yield return new WaitForSeconds(1f);
                 continue;
             }
 
-            GameObject prefab = fruits[Random.Range(0, fruits.Length)];
+            GameObject prefab = fruitPrefabs[Random.Range(0, fruitPrefabs.Length)];
 
-            if (bomb != null && Random.value < bombChance)
+            if (bombPrefab != null && Random.value < bombChance)
             {
-                prefab = bomb;
+                prefab = bombPrefab;
+            }
+
+            if (prefab == null)
+            {
+                yield return new WaitForSeconds(1f);
+                continue;
             }
 
             Vector3 position = new Vector3
@@ -67,7 +76,7 @@ public class Spawner : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(0f, 0f, Random.Range(minAngle, maxAngle));
 
             GameObject fruit = Instantiate(prefab, position, rotation);
-            Destroy(fruit, lifeTime);
+            Destroy(fruit, maxLifetime);
 
             Rigidbody body = fruit.GetComponent<Rigidbody>();
 
