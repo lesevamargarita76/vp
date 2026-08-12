@@ -21,7 +21,6 @@ public class Spawner : MonoBehaviour
 
     [SerializeField] private float maxLifetime = 5f;
 
-    [Tooltip("Задержка перед первым броском после включения спавнера")]
     [SerializeField] private float initialDelay = 2f;
 
     private Collider area;
